@@ -1,0 +1,17 @@
+*.pyc
+hotel/node_modules/*
+.DS_Store
+
+hotel/dist/*
+hotel/npm-debug.log*
+hotel/yarn-debug.log*
+hotel/yarn-error.log*
+cd/*
+# Editor directories and files
+.idea/*
+.vscode/*
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*._initial.py
