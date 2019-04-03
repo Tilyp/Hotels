@@ -145,7 +145,6 @@
           end: "",
           region: "",
           remark: "",
-          username:  window.sessionStorage.getItem("user"),
         },
         name: window.sessionStorage.getItem("name"),
         queryData:[],
@@ -171,6 +170,7 @@
           data.append("start", formName.start)
           data.append("end", formName.end)
           data.append("platform", formName.region)
+          data.append("username", window.sessionStorage.getItem("user"))
           data.append("remark", formName.remark)
           this.$axios.post(`/hotel/searchHotel`, data
              ).then((response) => {

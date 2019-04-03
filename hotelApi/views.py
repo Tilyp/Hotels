@@ -23,7 +23,7 @@ def get_hotel(request):
             start = today.strftime("%Y-%m-%d")
             d = datetime.timedelta(days=1)
             end = (today + d).strftime("%Y-%m-%d")
-        data = {"hotelId": hotelId, "start": start.replace("-", "%2F"), "end": end.replace("-", "%2F"),
+        data = {"hotelId": hotelId, "start": start, "end": end,
                 "platform": platform, "username": username, "modelId": modelId}
         try:
             uqh = UserQueryHotel.objects.get(hotelId=hotelId, modelId=modelId, username=username, platform=platform)
@@ -33,14 +33,18 @@ def get_hotel(request):
             uqh.save()
         except:
             UserQueryHotel.objects.create(**data)
-        result = hotel.get_result(data)
-        result = save_data(result)
-        msg = {"data": result, "status": 200}
+        update_lastTime(username=username)
+        msg = {}
         return JsonResponse(msg)
+
+def update_lastTime(username):
+    user = AdminUser.objects.get(username=username)
+    nowTime = datetime.datetime.now()
+    user.lastTime = nowTime
+    user.save()
 
 
 def save_data(data):
-    result = []
     midd = {}
     for d in data:
         if d["modelId"] not in midd.keys():
@@ -48,7 +52,6 @@ def save_data(data):
         else:
             if midd[d["modelId"]]["price"] > d["price"]:
                 midd[d["modelId"]] = d
-
     for mi in midd.values():
         try:
             qhm = HotelModel.objects.get(modelId=mi["modelId"], hotelId=mi["hotelId"], breakfast=mi["breakfast"])
@@ -59,21 +62,26 @@ def save_data(data):
                     qhm.commission = mi["commission"]
                     qhm.totalPrice = mi["totalPrice"]
                     qhm.crawler = 1
-                    qhm.save()
-                    mi["crawler"] = 1
+                    query = UserQueryHotel.objects.get(modelId=mi["modelId"], hotelId=mi["hotelId"])
+                    query.priceStatus = 1
+                    query.save()
                 else:
-                    mi["crawler"] = 0
+                    qhm.crawler = 0
+                qhm.update = datetime.datetime.now()
+                qhm.save()
         except Exception as e:
             HotelModel.objects.create(**mi)
-            mi["crawler"] = 0
-        result.append(mi)
-    return result
+
 
 
 def crawler_all(request):
     if request.method == 'POST':
-        crawler = request.POST.get('crawler')
-        HotelModel.objects.filter(crawler=1).update(crawler=crawler)
+        username = request.POST.get('username')
+        update_lastTime(username)
+        HotelModel.objects.filter(crawler=1, username=username).update(crawler=0)
+    return {"data": "", "status": 200}
+
+
 
 def register(request):
     if request.method == "POST":
@@ -125,6 +133,64 @@ def login(request):
             "message": message, "token": token}}, status=200)
 
 
+def crawler(request):
+    if request.method == "GET":
+        update = False
+        day = datetime.timedelta(days=1)
+        aus = AdminUser.objects.all().values_list("username", "lastTime")
+        for i in aus:
+            querys = UserQueryHotel.objects.filter(username=i[0], crawler=0, priceStatus=0)
+            for query in querys:
+                nowTime = datetime.datetime.now()
+                nextTime = (datetime.datetime.now() + day).strftime("%Y-%m-%d")
+                start = query.start
+                end = query.end
+                nextTime = datetime.datetime.strptime(nextTime, "%Y-%m-%d")
+                startTime = datetime.datetime.strptime(start, "%Y-%m-%d")
+                if (nextTime - startTime).seconds > 86400:
+                    start = nowTime.strftime("%Y-%m-%d")
+                    end = (nowTime + day).strftime("%Y-%m-%d")
+                    query.start = start
+                    query.end = end
+                    update = True
+                lastTime = datetime.datetime.now() - i[1]
+                if lastTime.seconds < 3600:
+                    data = {"hotelId": query.hotelId,
+                            "start": start.replace("-", "%2F"), "end": end.replace("-", "%2F"),
+                            "platform": query.platform, "username": query.username, "modelId": query.modelId}
+                    result = hotel.get_result(data)
+                    result = save_data(result)
+                else:
+                    query.crawler = 1
+                    update = True
+                if update:
+                    query.save()
 
-def crawler():
-    print("sdfsdfsadfasdff")
+    return JsonResponse({"DFS":"ASD"})
+
+
+def query_all(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        update_lastTime(username)
+        result = []
+        keys = ["hotelName", "hotelId", "modelId", "model", "domain", "bed", "breakfast", "price", "roomLeft", "crawler", "platform"]
+        hotelList = UserQueryHotel.objects.filter(username=username).values_list("hotelId", "modelId")
+        for i in hotelList:
+            hm = HotelModel.objects.filter(hotelId=i[0], modelId=i[1])
+            for h in hm:
+                result.append({key: getattr(h, key) for key in keys})
+
+    return {"data": result, "status": 200}
+
+def query_model(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        hotelId = request.POST["hotelId"]
+        modelId = request.POST["modelId"]
+        update_lastTime(username)
+        uqh = UserQueryHotel.objects.get(hotelId=hotelId, modelId=modelId)
+        uqh.priceStatus = 0
+        uqh.crawler = 0
+        uqh.save()
+    return {"data": "", "status": 200}

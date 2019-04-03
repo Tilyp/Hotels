@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'django_crontab',
+    # 'django_crontab',
     'hotelApi',
 ]
 
@@ -94,9 +94,9 @@ DATABASES = {
 }
 
 
-CRONJOBS = [
-    ('*/1 * * * *', 'hotelApi.views.crawler', '>> crawler.log')
-]
+# CRONJOBS = [
+#     ('*/1 * * * *', 'hotelApi.views.crawler', '>> crawler.log')
+# ]
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 
@@ -127,7 +127,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ= False
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

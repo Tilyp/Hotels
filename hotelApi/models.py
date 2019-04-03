@@ -21,6 +21,7 @@ class HotelModel(models.Model):
     update = models.DateTimeField(default=timezone.now,  verbose_name=u'更新时间')
     insertDate = models.DateTimeField(default=timezone.now,  verbose_name=u'插入时间')
     platform = models.CharField(max_length=100)
+    # userquery = models.ForeignKey('UserQueryHotel')
 
     class Meta:
         ordering = ['id']
@@ -46,6 +47,7 @@ class UserQueryHotel(models.Model):
     username = models.CharField(max_length=50, verbose_name=u"用户名")
     hotelId = models.CharField(max_length=100)
     crawler = models.SmallIntegerField(default=0)
+    priceStatus = models.SmallIntegerField(default=0)
     start = models.CharField(max_length=50, verbose_name=u"开始时间")
     end = models.CharField(max_length=50, verbose_name=u"结束时间")
     modelId = models.CharField(max_length=100)
