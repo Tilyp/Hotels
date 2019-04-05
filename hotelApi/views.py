@@ -78,8 +78,8 @@ def crawler_all(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         update_lastTime(username)
-        HotelModel.objects.filter(crawler=1, username=username).update(crawler=0)
-    return {"data": "", "status": 200}
+        UserQueryHotel.objects.filter(crawler=1, username=username).update(crawler=0)
+    return JsonResponse({"data": {}, "status": 200})
 
 
 

@@ -11,7 +11,7 @@ class Hotel(object):
         self.sess = requests.session()
         self.url = "https://taap.expedia.cn/Shanghai-Hotels-Cordis-Shanghai-Hongqiao.h{id}.Hotel-Information?chkin={start}&chkout={end}"
         self.cookie = ""
-        self.login()
+        # self.login()
 
     def get_result(self, dat):
         refer = "https://taap.expedia.cn/Hotel-Search?destination=%E5%85%B0%E5%B7%9E,+%E7%94%98%E8%82%83,+%E4%B8%AD%E5%9B%BD&startDate={st}&endDate={ed}&adults=2&regionId=2071&latLong=36.32231,103.643872"

@@ -58,7 +58,10 @@
     </div>
 
    <div class="result">
-     <span class="resTi">查询结果</span>
+     <div class="resTi">
+       <span style="color:#00F">查询结果</span>
+       <el-button class="crawler" type="success" @click="crawler()">全部爬取</el-button>
+     </div>
     <el-table
     :data="queryData"
     border
@@ -181,6 +184,19 @@
              });
         }
       },
+      crawler(){
+        var data = new FormData()
+        data.append("username", window.sessionStorage.getItem("user"))
+        this.$axios.post(`/hotel/crawler_all`, data
+             ).then((response) => {
+                 this.$message({
+                      message: "操作成功！",
+                      type: 'success',
+                  })
+             }).catch((error) => {
+                 console.log(error);
+             });
+      },
       logout(){
              window.sessionStorage.removeItem("name");
              window.sessionStorage.removeItem("token");
@@ -232,9 +248,12 @@
 
   }
   .resTi{
-    width: 50%;
+    width: 100%;
     margin: 15px;
     font-size: 20px;
     font-family: "Adobe 仿宋 Std R";
+  }
+  .crawler{
+    float: right;
   }
 </style>
